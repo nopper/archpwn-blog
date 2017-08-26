@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Mirrored from blog.archpwn.org/2009/06/18/packet-manipulator-fingerprint-module/ by HTTrack Website Copier/3.x [XR&CO'2013], Mon, 23 Dec 2013 16:17:24 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>
+Packet Manipulator: fingerprint module :
+ nopper&#39;s blog</title>
+
+    <link href="../../../../media/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="../../../../media/css/960.css" rel="stylesheet" type="text/css" />
+    <link href="../../../../media/css/jquery-ui.css" rel="stylesheet" type="text/css" />
+    <link href="../../../../media/style.css" rel="stylesheet" type="text/css" />
+
+    <link rel="pingback" href="../../../../xmlrpc/index.html"/>
+    
+<link type="text/css" rel="stylesheet" href="../../../../media/css/hilite.css" />
+
+
+<!--[if IE]>
+    <script src="/media/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+<!--[if lte IE 8]>
+    <link href="/media/css/ie.css" rel="stylesheet" type="text/css" />
+<![endif]-->
+
+    <script type="text/javascript" src="../../../../media/js/jquery.js"></script>
+    
+        <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9430447-2']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+    
+    
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.star-rating').mouseenter(removeVotes).mouseleave(applyVotes);
+    $('.star-rating').each(applyVotes);
+});
+
+function applyVotes() {
+    var start = 1;
+    var rating = parseInt($(this).attr('data-rating'));
+    $(this).children().each(function() {
+        if (start <= rating) {
+            $(this).children().each(function() {
+                $(this).removeClass('star' + start).addClass('star' + start + 'a');
+            });
+            start += 1;
+        }
+    });
+}
+
+function removeVotes() {
+    var start = 1;
+    var rating = parseInt($(this).attr('data-rating'));
+    $(this).children().each(function() {
+        if (start <= rating) {
+            $(this).children().each(function() {
+                $(this).addClass('star' + start).removeClass('star' + start + 'a');
+            });
+            start += 1;
+        }
+    });
+}
+
+function pushVote(val, ctype, pk) {
+    $.ajax({
+        type: "POST",
+        data: {'content_type': ctype, 'value': val, 'object_pk': pk, 'csrfmiddlewaretoken': '2c0cc8ea2e61f8927d8ede09ede5ca2b'},
+        url: "/votes/push_vote/",
+        cache: false,
+        dataType: 'json',
+        success: function(data) {
+            $('#stars-' + pk).attr('data-rating', data['result']).mouseleave();
+            $('#stars-' + pk + ' > li#star-msg-' + pk).html("<strong>Thanks!</strong>");
+        }
+    });
+}
+</script>
+
+</head>
+<body>
+<div id="wrapper" class="container_12">
+    <header id="header" class="grid_12">
+        <img src="../../../../media/images/cat.png" alt="" class="logo" width="400" height="171" />
+        <h1><a href="../../../../index.html">nopper&#39;s blog</a></h1>
+    </header>
+    
+<div id="content">
+    <nav>
+        <ul id="menu" class="clearfix">
+            <li><a id="current-menu" href="../../../../index.html">Home</a></li>
+<li><a href="../../../../about/index.html">About</a>
+    <ul>
+        <li><a href="../../../../about/legal/index.html">Legal</a></li>
+        <li><a href="../../../../about/conduct/index.html">Code of conduct</a></li>
+        <li><a href="../../../../about/contact/index.html">Contact</a></li>
+    </ul>
+</li>
+<li><a href="../../../../../www.archpwn.org/index.html">ArchPwn</a>
+    <ul>
+        <li><a href="../../../../../www.archpwn.org/index.html">Homepage</a></li>
+        <li><a href="http://github.com/nopper/archpwn/">Development</a></li>
+    </ul>
+</li>
+
+        </ul>
+    </nav>
+    <!--[if lte IE 7]>
+        <div class="ie grid_7"></div>
+    <![endif]-->
+
+    <section id="main" class="grid_8 alpha">
+        
+
+    
+
+<article class="post">
+    <h1><a href="index.html">Packet Manipulator: fingerprint&nbsp;module </a></h1>
+
+
+
+
+    
+    <ul id="stars-3" class='star-rating alignleft' data-rating="">
+        <li><a href='#' title='Rate this 1 star out of 5' class='star1' onclick='pushVote(1,"articles.post",3);'>1</a></li>
+        <li><a href='#' title='Rate this 2 stars out of 5' class='star2' onclick='pushVote(2,"articles.post",3);'>2</a></li>
+        <li><a href='#' title='Rate this 3 stars out of 5' class='star3' onclick='pushVote(3,"articles.post",3);'>3</a></li>
+        <li><a href='#' title='Rate this 4 stars out of 5' class='star4' onclick='pushVote(4,"articles.post",3);'>4</a></li>
+        <li><a href='#' title='Rate this 5 stars out of 5' class='star5' onclick='pushVote(5,"articles.post",3);'>5</a></li>
+        <li style="margin-left: 110px" id="star-msg-3"></li>
+    </ul>
+<div class="react alignright">
+
+Reactions: 0 pingback - 0 comments - 0 votes
+</div>
+
+<div class="clear"></div>
+
+
+<div class="article-content">
+
+
+    <p>Take a look to this video that presents the new fingerprint module introduced in <a href="http://manipulator.umitproject.org/">PacketManipulator</a>:</p>
+<p><center><object width="480" height="385"><param name="movie" value="http://www.youtube.com/v/c27k7pIS9AY&amp;hl=en_US&amp;fs=1&amp;rel=0&amp;color1=0xe1600f&amp;color2=0xfebd01"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/c27k7pIS9AY&amp;hl=en_US&amp;fs=1&amp;rel=0&amp;color1=0xe1600f&amp;color2=0xfebd01" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="480" height="385"></embed></object></center></p>
+<p>It has the same behavior of <a href="http://ettercap.sf.net/">ettercap</a>.</p>
+
+
+</div>
+
+<div class="clear"></div>
+
+
+
+<footer class="postmeta">
+    <span class="btn alignleft">
+        
+        Tags: <a href="../../../../tag/gsoc/index.html">GSoC</a> <a href="../../../../tag/pm/index.html">PM</a> <a href="../../../../tag/project/index.html">Project</a> <a href="../../../../tag/umit/index.html">Umit</a> 
+        on June 18, 2009, 8:35 p.m.
+    </span>
+    
+
+        <div id="comment-grid" class="grid_7">
+
+
+
+<div id="cmtcollector" class="grid_7 comment-entry alpha">
+
+</div>
+        <div class="grid_6 cmtsep"></div>
+        
+        
+        <form id="comment-form"><div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='2c0cc8ea2e61f8927d8ede09ede5ca2b' /></div>
+            <input type="hidden" name="content_type" value="articles.post" id="id_content_type" />
+            <input type="hidden" name="object_pk" value="3" id="id_object_pk" />
+            <input type="hidden" name="timestamp" value="1387815400" id="id_timestamp" />
+            <input type="hidden" name="security_hash" value="4e77886a39bf56e6b115d4f83d58192e45ea0e74" id="id_security_hash" />
+            <p>
+                <label for="id_name" class="grid_2">Name*:</label>
+                <input type="text" name="name" id="id_name" tabindex="1" class="grid_4 required"
+                >
+            </p>
+            <div class="clear"></div>
+            <p>
+                <label for="id_email" class="grid_2">Email*:</label>
+                <input type="text" name="email" id="id_email" tabindex="2" class="grid_4 required"
+                >
+            </p>
+            <div class="clear"></div>
+            <p>
+                <label for="id_url" class="grid_2">Website:</label>
+                <input type="text" name="url" id="id_url" tabindex="3" class="grid_4" value="">
+            </p>
+            <div class="clear"></div>
+            <p>
+                <textarea name="comment" id="id_comment" tabindex="4" class="grid_6 required" rows="7"></textarea>
+            </p>
+            <div class="clear"></div>
+            <div class="grid_5"></div>
+            <p>
+                <input id="id_post" name="submit" type="submit" value="Post comment" tabindex="5" class="styledbtn grid_2">
+            </p>
+        </form>
+        </div>
+        <div class="clear"></div>
+
+<script type="text/javascript" src="../../../../media/js/jquery-ui.js"></script>
+
+<script type="text/javascript">
+function deleteComment(id) {
+    $('<div></div>').html('Are you sure you want to delete this comment?').dialog({
+        title: "Comment deletion",
+        modal: true,
+        resizable: false,
+        draggable: false,
+        buttons: {
+            "Cancel": function() {$(this).dialog("close");},
+            "Proceed": function() {
+                $(this).dialog("close");
+                $.ajax({
+                    type: "POST",
+                    data: {'id':id, 'csrfmiddlewaretoken' : '2c0cc8ea2e61f8927d8ede09ede5ca2b'},
+                    url: "/comments/delete/",
+                    cache: false,
+                    success: function(html, textStatus) {
+                        $("#cmtentry-" + id).hide("slow").remove();
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        $('<div></div>').html('Unable to delete your comment.<br/>We apologise for the incovenience.').dialog({
+                            title: "Comment error",
+                            modal: true,
+                            resizable: false,
+                            draggable: false,
+                            buttons: {
+                                "Ok": function() {$(this).dialog("close");}
+                            }
+                        }).dialog();
+                    }
+                });
+            },
+        }
+    }).dialog();
+    return false;
+};
+$(document).ready(function() {
+    $('#comment-form').submit(function() {
+        //$dialog.dialog('open');
+        $.ajax({
+            type: "POST",
+            data: $('#comment-form').serialize(),
+            url: "/comments/add/",
+            cache: false,
+            dataType: 'json',
+            success: function(data) {
+                if (data['error']) {
+                    $('<div></div>').html(data['error']).dialog({
+                        title: "Comment error",
+                        modal: true,
+                        resizable: false,
+                        draggable: false,
+                        buttons: {
+                            "Ok": function() {$(this).dialog("close");}
+                        }
+                    });
+                    return;
+                };
+                $("#cmtcollector").append(data['html']);
+                $('#id_comment').val('');
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $('<div></div>').html('Unable to post your comment.<br/>We apologise for the incovenience.').dialog({
+                    title: "Comment error",
+                    modal: true,
+                    resizable: false,
+                    draggable: false,
+                    buttons: {
+                        "Ok": function() {$(this).dialog("close");}
+                    }
+                }).dialog();
+            }
+        });
+        return false;
+    });
+});
+</script>
+
+
+</footer>
+</article>
+
+
+
+    </section>
+    <aside id="sidebar" class="grid_4 alpha omega">
+        <div class="widget">
+    <h3></h3>
+    
+
+
+
+
+
+    <form id="login-form" action="http://blog.archpwn.org/login/?p=/2009/06/18/packet-manipulator-fingerprint-module/" method="post"><div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='2c0cc8ea2e61f8927d8ede09ede5ca2b' /></div>
+        <table>
+        <tbody>
+            <tr>
+                <td><input id="login_email" class="styledentry" type="text" value="Email" name="email" placeholder="Email" title="Email"></td>
+                <td>
+                    <input id="login_password" class="styledentry" type="text" value="Password" name="password" placeholder="Password" title="Password">
+                    <input id="login_password_hidden" class="styledentry" type="password" name="password" value="" autocomplete="off"/>
+                </td>
+                <td><input class="styledbtn" type="submit" value="Login"></td>
+            </tr>
+            <tr>
+                <td><ul id="mininav">
+   <li>
+    <a href="#">Login with...</a>
+
+<ul class="auth-login">
+    <li class="auth-login-btn auth-login-btn-twitter"><a href="../../../../accounts/twitter_login/index.html"></a></li>
+    <li class="auth-login-btn auth-login-btn-yahoo"><a href="../../../../accounts/yahoo_login/index.html"></a></li>
+    <li class="auth-login-btn auth-login-btn-openid"><a href="../../../../accounts/openid/index.html"></a></li>
+    <li class="auth-login-btn auth-login-btn-google"><a href="../../../../accounts/gmail_login/index.html"></a></li>
+    <li class="auth-login-btn auth-login-btn-facebook"><a id="fb-login" href="#"></a></li>
+</ul>
+<div id="fb-root"></div>
+<script src="http://connect.facebook.net/en_US/all.js" type="text/javascript"></script>
+<script type="text/javascript">
+function handleSession(response) {
+    if (response.session)
+        window.location = "../../../../accounts/facebook_login/done/index.html";
+}
+
+FB.init({ appId : '137148199632143', status: true, cookie: true});
+FB.Event.subscribe('auth.sessionChange',handleSession);
+
+$('#fb-login').click(function() {
+    FB.login(handleSession);
+    return false;
+});
+
+</script>
+
+</li>
+</ul>
+</td>
+                <td colspan="2" class="righttxt">
+                    <a id="lbl_forget" href="../../../../accounts/reset/index.html" title="Reset your password">Forgot your password?</a>
+                </td>
+            </tr>
+        </tbody>
+        </table>
+    </form>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#login_email").focus(function() {
+        if ($(this).val() == $(this).attr('placeholder'))
+            $(this).val('').css({'color': '#000'});
+    }).blur(function() {
+        if ($(this).val() == '')
+            $(this).val($(this).attr('placeholder')).css({'color': '#777'});
+    });
+
+    $("#login_password").focus(function() {
+        if ($(this).val() == $(this).attr('placeholder')) {
+            $(this).hide();
+            $("#login_password_hidden").show().focus();
+        }
+    });
+});
+</script>
+
+
+
+
+</div>
+<div class="widget">
+    <h3>Fortune cookie</h3>
+    
+<div class="grid_3">
+
+<span style="font-style: italic">Parting is such sweet sorrow. -William Shakespeare</span>
+</div>
+<div id="fry-addicted" class="grid_1 omega alpha"></div>
+<div class="clear"></div>
+
+</div>
+<div class="widget">
+    <h3>Best Posts</h3>
+    
+
+<ul class="recentcmts">
+
+    <li><a class="rctcmt-author" href="../../../../2010/08/06/archpwn-20-rc1-released/index.html">ArchPwn 2.0-RC1 released</a> &rarr; <a class="rctcmt-txt" href="../../../../2010/08/06/archpwn-20-rc1-released/index.html">Today we&#39;ve released the first release candidate ...</a></li>
+
+    <li><a class="rctcmt-author" href="../../../../2010/08/09/backup-your-django-database-using-fabric/index.html">Backup your django database ...</a> &rarr; <a class="rctcmt-txt" href="../../../../2010/08/09/backup-your-django-database-using-fabric/index.html">The use of a simple python script ...</a></li>
+
+    <li><a class="rctcmt-author" href="../../../../2010/07/02/towards-archpwn-2/index.html">Towards ArchPwn 2</a> &rarr; <a class="rctcmt-txt" href="../../../../2010/07/02/towards-archpwn-2/index.html">If you are interested in helping us ...</a></li>
+
+</ul>
+
+</div>
+<div class="widget">
+    <h3>Latest comments</h3>
+    
+
+<ul class="recentcmts">
+
+    
+    <li>On <a class="rctcmt-author" href="../../../../2010/07/02/towards-archpwn-2/index.html">Towards ArchPwn 2</a> by Beyecixramd: <a class="rctcmt-txt" href="../../../../comments/cr/25/8/index.html#c1">I like your distro. I used to have Backtrack, but ...</a></li>
+
+    
+    <li>On <a class="rctcmt-author" href="../../../../2010/07/02/towards-archpwn-2/index.html">Towards ArchPwn 2</a> by nopper: <a class="rctcmt-txt" href="../../../../comments/cr/25/8/index.html#c2">Sorry for the delay in replying but I&#39;m pretty busy ...</a></li>
+
+    
+    <li>On <a class="rctcmt-author" href="../../../../2010/08/09/backup-your-django-database-using-fabric/index.html">Backup your django database using fabric</a> by Garth Humphreys: <a class="rctcmt-txt" href="../../../../comments/cr/25/10/index.html#c3">Thanks for sharing this info, it helped me figure out ...</a></li>
+
+    
+    <li>On <a class="rctcmt-author" href="../../../../2010/08/06/archpwn-20-rc1-released/index.html">ArchPwn 2.0-RC1 released</a> by jack: <a class="rctcmt-txt" href="../../../../comments/cr/25/9/index.html#c4">just found your ArchPwn from Google Ad. seems great. will ...</a></li>
+
+    
+    <li>On <a class="rctcmt-author" href="../../../../2010/08/06/archpwn-20-rc1-released/index.html">ArchPwn 2.0-RC1 released</a> by nopper: <a class="rctcmt-txt" href="../../../../comments/cr/25/9/index.html#c5">You can contribute to our project by using github. Just ...</a></li>
+
+</ul>
+
+</div>
+<div class="widget">
+    <h3>Fresh RSS</h3>
+    
+
+<div class="grid_4 fresh-rss">
+    <ul>
+        <li><a href="http://fusion.google.com/add?feedurl=http://nopper.archpwn.org/feeds/latest/">Google reader</a></li>
+        <li><a href="../../../../feeds/latest/index.html">RSS feed</a></li>
+    </ul>
+</div>
+<div class="clear"></div>
+
+
+</div>
+<div class="widget">
+    <h3>Links</h3>
+    
+<ul>
+<li><a href="http://www.haiku-os.org/">Haiku OS</a></li>
+<li><a href="http://www.haiku-os.it/">Haiku OS - Italian UG</a></li>
+<li><a href="http://malforge.com/">Malforge</a></li>
+<li><a href="http://blog.zynamics.com/">Zynamics' blog</a></li>
+<li><a href="http://www.jacobian.org/">Jacob Kaplan-Moss's blog</a></li>
+<li><a href="http://blog.cr0.org/">cr0's blog</a></li>
+<li><a href="http://blog.ksplice.com/">Ksplice's blog</a></li>
+<li><a href="http://www.pornosecurity.org/">PornoSecurity</a></li>
+<li><a href="http://stacktrace.it/">StackTrace</a></li>
+</ul>
+
+</div>
+<div class="widget">
+    <h3>Tag Cloud</h3>
+    
+<p>
+
+
+<span class="tag-4"><a href="../../../../tag/ArchPwn/index-2.html">ArchPwn</a></span>
+
+<span class="tag-3"><a href="../../../../tag/Backup/index-2.html">Backup</a></span>
+
+<span class="tag-3"><a href="../../../../tag/Database/index-2.html">Database</a></span>
+
+<span class="tag-3"><a href="../../../../tag/Django/index-2.html">Django</a></span>
+
+<span class="tag-3"><a href="../../../../tag/Fabric/index-2.html">Fabric</a></span>
+
+<span class="tag-7"><a href="../../../../tag/GSoC/index-2.html">GSoC</a></span>
+
+<span class="tag-4"><a href="../../../../tag/Haiku/index-2.html">Haiku</a></span>
+
+<span class="tag-3"><a href="../../../../tag/Interview/index.html">Interview</a></span>
+
+<span class="tag-3"><a href="../../../../tag/PM/index-2.html">PM</a></span>
+
+<span class="tag-8"><a href="../../../../tag/Project/index-2.html">Project</a></span>
+
+<span class="tag-3"><a href="../../../../tag/PyGtkHex/index.html">PyGtkHex</a></span>
+
+<span class="tag-3"><a href="../../../../tag/Python/index-2.html">Python</a></span>
+
+<span class="tag-8"><a href="../../../../tag/Release/index-2.html">Release</a></span>
+
+<span class="tag-3"><a href="../../../../tag/Umit/index-2.html">Umit</a></span>
+
+</p>
+
+</div>
+<div class="widget">
+    <h3>Archive</h3>
+    
+
+
+
+
+<ul>
+
+
+    <li><a href="../../../../2010/08/index.html" title="Archive for Aug 2010">
+        2 posts written in Aug 2010
+    </a></li>
+
+    <li><a href="../../../../2010/07/index.html" title="Archive for Jul 2010">
+        1 post written in Jul 2010
+    </a></li>
+
+    <li><a href="../../index.html" title="Archive for Jun 2009">
+        2 posts written in Jun 2009
+    </a></li>
+
+    <li><a href="../../../05/index.html" title="Archive for May 2009">
+        1 post written in May 2009
+    </a></li>
+
+    <li><a href="../../../04/index.html" title="Archive for Apr 2009">
+        1 post written in Apr 2009
+    </a></li>
+
+</ul>
+
+
+</div>
+<div class="widget">
+    <h3>Projects</h3>
+    
+<div style="text-align: justify">
+<p>For everyone like me that loves social coding, I'm on <a href="http://github.com/nopper">github</a>.
+Feel free to share your code with me :)</p>
+</div>
+<ul class="sexy-list">
+    <li><a href="http://manipulator.umitproject.org/" title="Network Packet Crafter">PacketManipulator</a></li>
+    <li><a href="http://www.umitproject.org/" title="Umit Nmap Frontend">Umit Nmap Frontend</a></li> 
+    <li><a href="http://github.com/nopper/archpwn" title="ArchPwn Security Live Project">ArchPwn</a></li> 
+    <li><a href="http://github.com/nopper/quadro" title="Simple paint program inspired by Brushes app">Quadro</a></li>
+    <li><a href="http://github.com/nopper/i8kmonitor" title="Fan control daemon for i8k or ACPI thermal zone">i8kmonitor</a></li>
+    <li><a href="http://sourceforge.net/projects/pyocr/" title="Simple Optical Character Recognition program">PyOCR</a></li>
+    <li><a href="http://keymouse.berlios.de/" title="Simple mouse emulator for linux">KeyMouse</a></li>
+    <li><a href="http://isteric.berlios.de/" title="Advanced IRC client written in gtk#">IsteRiC#</a></li>
+    <li><a href="http://nervous.berlios.de/" title="Another stupid IRC client written in gtkmm">nervous</a></li>
+    <li><a href="http://www.pyacqua.net/" title="Aquarium's manager written in PyGtk">PyAcqua</a></li>
+</ul>
+
+</div>
+
+    </aside>
+    <div id="shadow" class="grid_12"></div>
+</div>
+
+    
+    <footer id="footer" class="grid_12">
+        
+
+
+
+<div id="footblock1" class="grid_4 footblock">
+    <div class="footer-icon feed-icon"><h3>ArchPwn</h3></div>
+    <ul>
+
+    <li><a href="https://github.com/nopper/archpwn/commit/d0b8d77e8e77b7dd4d4c5afe08393b14dafacdd5" title="Merge branch 'testing' Conflicts: repo/tunneling/ctunnel/PKGBUILD repo/voip/sipvicious/PKGBUILD repo/www/burpsuite/PKGBUILD">Merge branch 'testing'</a></li>
+
+    <li><a href="https://github.com/nopper/archpwn/commit/768bdbd259ef04757896fd19aa4f47416985e704" title="Update list/ directory">Update list/ directory</a></li>
+
+    <li><a href="https://github.com/nopper/archpwn/commit/db913519094fbe4b49908651c52f444a928af7a3" title="Update configuration for archpwn-mini profile">Update configuration for archpwn-mini profile</a></li>
+
+    <li><a href="https://github.com/nopper/archpwn/commit/5cbad7d225bccb15977c82f19e2201bd02496d10" title="Use grub instead">Use grub instead</a></li>
+
+    <li><a href="https://github.com/nopper/archpwn/commit/398600edb1b18ab608dc32c5d03105ebaaed4583" title="Removing isolinux directory">Removing isolinux directory</a></li>
+
+</ul>
+
+</div>
+<div id="footblock2" class="grid_4 omega footblock">
+    <div class="footer-icon tweet-icon"><h3>Tweets</h3></div>
+    <ul>
+
+    <li><a href="#" title="Unable to parse RSS feed">Unable to parse RSS feed</a></li>
+
+</ul>
+
+</div>
+<div id="footblock3" class="grid_4 omega footblock">
+    <div class="footer-icon delicious-icon"><h3>Delicious</h3></div>
+    <ul>
+
+    <li><a href="http://www.packetstan.com/2011/05/sorting-packet-captures-with-scapy.html" title="">Sorting Packet Captures with Scapy</a></li>
+
+    <li><a href="http://oli4444.wordpress.com/2011/05/07/memory-leak-debugging/" title="">Olivier Sessink: memory leak debugging</a></li>
+
+    <li><a href="http://bonsaiden.github.com/JavaScript-Garden/" title="">JavaScript Garden</a></li>
+
+    <li><a href="http://code.google.com/p/emscripten/" title="llvm-to-javascript">LLVM bytecode to javascript</a></li>
+
+    <li><a href="http://www.pagetable.com/?p=410" title="">Internals of BRK/IRQ/NMI/RESET on a MOS 6502 ...</a></li>
+
+</ul>
+
+</div>
+
+
+    </footer>
+    <div class="clear"></div>
+    <div id="footnote" class="grid_12">
+        <p>Copyright &copy; 2010 <a href="#">nopper.archpwn.org</a></p>
+<p>This is the official my personal blog and official one of the <a title="ArchPwn Homepage" href="../../../../../www.archpwn.org/index.html">ArchPwn</a> project.</p>
+<p><a title="ArchPwn Homepage" href="../../../../../www.archpwn.org/index.html">ArchPwn</a> is released under the terms of GPL license. All rights reserved.</p>
+<p><a href="http://jigsaw.w3.org/css-validator/check/referer" title="CSS validator">CSS</a>/<a href="http://validator.w3.org/check?uri=referer" title="XHTML validator">HTML</a> valid.</p>
+    </div>
+
+    
+</div>
+</body>
+
+<!-- Mirrored from blog.archpwn.org/2009/06/18/packet-manipulator-fingerprint-module/ by HTTrack Website Copier/3.x [XR&CO'2013], Mon, 23 Dec 2013 16:17:24 GMT -->
+</html>
